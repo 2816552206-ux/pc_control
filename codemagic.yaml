@@ -20,7 +20,9 @@ workflows:
         script: |
           flutter clean
           flutter pub get
-          cd ios && pod install --repo-update && cd ..
+          if [ -f ios/Podfile ]; then
+            cd ios && pod install --repo-update && cd ..
+          fi
       - name: Build and package IPA
         script: |
           set -e
