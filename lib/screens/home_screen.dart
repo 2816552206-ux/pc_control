@@ -256,41 +256,102 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStatusCards() {
     final items = [
+      ('数据时间', _status.dataTime, Icons.update),
       ('电脑开机时间', _status.bootTime, Icons.access_time),
       ('运行时长', _status.uptime, Icons.timer),
       ('CPU温度', _status.cpuTemp, Icons.thermostat),
       ('CPU使用率', _status.cpuPercent, Icons.memory),
       ('内存使用率', _status.memoryPercent, Icons.storage),
-      ('显卡使用率', _status.gpuPercent, Icons.videocam),
-      ('磁盘使用率(C盘)', _status.diskPercent, Icons.disc_full),
+      ('磁盘使用率', _status.diskPercent, Icons.disc_full),
+    ];
+
+    // GPU 数据项
+    final gpuItems = [
+      if (_status.gpuName != '-' && _status.gpuName.isNotEmpty)
+        ('显卡型号', _status.gpuName, Icons.videocam),
+      ('显卡使用率', _status.gpuPercent, Icons.trending_up),
+      if (_status.gpuTemp != '-' && _status.gpuTemp != 'N/A')
+        ('显卡温度', _status.gpuTemp, Icons.thermostat),
+      if (_status.gpuMemory != '-' && _status.gpuMemory != 'N/A')
+        ('显卡显存', _status.gpuMemory, Icons.memory),
+      if (_status.gpuPower != '-' && _status.gpuPower != 'N/A')
+        ('显卡功耗', _status.gpuPower, Icons.bolt),
+      if (_status.gpuFan != '-' && _status.gpuFan != 'N/A')
+        ('显卡风扇', _status.gpuFan, Icons.air),
+      if (_status.gpuClock != '-' && _status.gpuClock != 'N/A')
+        ('显卡频率', _status.gpuClock, Icons.speed),
     ];
 
     return Column(
-      children: items.map((item) {
-        return Card(
-          color: const Color(0xFF161B22),
-          margin: const EdgeInsets.only(bottom: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: const BorderSide(color: Color(0xFF30363D), width: 0.5),
-          ),
-          child: ListTile(
-            leading: Icon(item.$3, color: Colors.white54, size: 22),
-            title: Text(
-              item.$1,
-              style: const TextStyle(color: Colors.white54, fontSize: 13),
+      children: [
+        // 系统信息
+        ...items.map((item) {
+          return Card(
+            color: const Color(0xFF161B22),
+            margin: const EdgeInsets.only(bottom: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Color(0xFF30363D), width: 0.5),
             ),
-            trailing: Text(
-              item.$2,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            child: ListTile(
+              leading: Icon(item.$3, color: Colors.white54, size: 22),
+              title: Text(
+                item.$1,
+                style: const TextStyle(color: Colors.white54, fontSize: 13),
+              ),
+              trailing: Text(
+                item.$2,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+          );
+        }),
+        // GPU 分隔
+        if (gpuItems.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                Icon(Icons.videocam, color: Color(0xFF4CAF50), size: 16),
+                SizedBox(width: 6),
+                Text(
+                  '显卡详情',
+                  style: TextStyle(color: Color(0xFF4CAF50), fontSize: 14),
+                ),
+              ],
+            ),
           ),
-        );
-      }).toList(),
+          ...gpuItems.map((item) {
+            return Card(
+              color: const Color(0xFF1B2316),
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFF2A3A20), width: 0.5),
+              ),
+              child: ListTile(
+                leading: Icon(item.$3, color: Colors.white54, size: 22),
+                title: Text(
+                  item.$1,
+                  style: const TextStyle(color: Colors.white54, fontSize: 13),
+                ),
+                trailing: Text(
+                  item.$2,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ],
     );
   }
 }

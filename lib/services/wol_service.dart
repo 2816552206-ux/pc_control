@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 class WolService {
   /// 发送魔术包到指定 MAC 地址
   /// [macAddress] 格式: "AA:BB:CC:DD:EE:FF" 或 "AA-BB-CC-DD-EE-FF"
-  /// [broadcastIp] 广播地址，默认 255.255.255.255
+  /// [broadcastIp] 广播地址，支持 IPv4 (255.255.255.255) 和 IPv6 (组播 FF02::1)
   /// [port] 目标端口，默认 9
   static Future<bool> sendMagicPacket({
     required String macAddress,
@@ -29,24 +29,46 @@ class WolService {
         packet.setAll(6 + i * 6, macBytes);
       }
 
-      debugPrint('[WOL] 发送魔术包到 $macAddress → $broadcastIp:$port');
+      // 判断是 IPv6 地址
+      final isIPv6 = broadcastIp.contains(':');
 
-      // 发送 UDP 广播
-      final socket = await RawDatagramSocket.bind(
-        InternetAddress.anyIPv4,
-        0,
-      );
-      socket.broadcastEnabled = true;
+      debugPrint('[WOL] 发送魔术包到 $macAddress → $broadcastIp:$port (${isIPv6 ? "IPv6" : "IPv4"})');
 
-      final sent = socket.send(
-        packet,
-        InternetAddress(broadcastIp),
-        port,
-      );
-      socket.close();
+      if (isIPv6) {
+        // IPv6 使用组播或单播发送
+        final socket = await RawDatagramSocket.bind(
+          InternetAddress.anyIPv6,
+          0,
+        );
+        socket.broadcastEnabled = false;
 
-      debugPrint('[WOL] 发送结果: ${sent == packet.length ? "成功" : "失败"}');
-      return sent == packet.length;
+        final sent = socket.send(
+          packet,
+          InternetAddress(broadcastIp),
+          port,
+        );
+        socket.close();
+
+        debugPrint('[WOL] IPv6 发送结果: ${sent == packet.length ? "成功" : "失败"}');
+        return sent == packet.length;
+      } else {
+        // IPv4 广播
+        final socket = await RawDatagramSocket.bind(
+          InternetAddress.anyIPv4,
+          0,
+        );
+        socket.broadcastEnabled = true;
+
+        final sent = socket.send(
+          packet,
+          InternetAddress(broadcastIp),
+          port,
+        );
+        socket.close();
+
+        debugPrint('[WOL] IPv4 发送结果: ${sent == packet.length ? "成功" : "失败"}');
+        return sent == packet.length;
+      }
     } catch (e) {
       debugPrint('[WOL] 发送异常: $e');
       return false;

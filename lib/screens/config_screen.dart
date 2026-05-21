@@ -81,17 +81,12 @@ class _ConfigScreenState extends State<ConfigScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildLabel('电脑 IP 地址'),
+            _buildLabel('电脑 IP 地址 (IPv4 或 IPv6)'),
             const SizedBox(height: 8),
             _buildTextField(
               controller: _ipCtrl,
-              hint: '例如 192.168.1.100',
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'[\d.]'),
-                ),
-              ],
+              hint: '例如 192.168.1.100 或 240e::d36',
+              keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 20),
             _buildLabel('MAC 地址（物理地址）'),
